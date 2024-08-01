@@ -1,0 +1,28 @@
+location: "London"
+overpass_endpoint: "https://overpass-api.de/api/interpreter"
+datasets:
+  amenity:
+    tag: "amenity"
+    values: ["school", "hospital", "pub", "restaurant"]
+  shop:
+    tag: "shop"
+    values: ["supermarket"]
+  leisure:
+    tag: "leisure"
+    values: ["fitness_centre", "swimming_pool"]
+  highway:
+    tag: "highway"
+    values: ["bus_stop"]
+  railway:
+    tag: "railway"
+    values: ["station", "tram_stop"]
+
+
+plots:
+  mapbox_token: "pk.eyJ1IjoibWFja2xhcnMiLCJhIjoiY2w2dXo2OGRvMWh0MzNmcGJ3eDQyNDBrOCJ9.uyOgYliAIB1EZ8xWWyH1BQ"
+  colors:
+    amenity: "purple"
+    shop: "#EC9706"
+    leisure: "brown"
+    highway: "#ED7014"
+    railway: "#AAFF00"

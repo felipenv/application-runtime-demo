@@ -1,0 +1,12 @@
+geojson
+geopandas
+h3pandas
+ipython
+jupyter
+nbstripout
+osmnx
+overpy
+pandas
+scikit-learn
+h3
+tobler

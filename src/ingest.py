@@ -1,6 +1,6 @@
 import pandas as pd
 
-from fetch_poi import FetchPoi
+from src.fetch_poi import FetchPoi
 
 
 def fetch(config):

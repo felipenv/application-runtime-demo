@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.fetch_poi import FetchPoi
+from fetch_poi import FetchPoi
 
 
 def fetch(config):
@@ -20,8 +20,11 @@ def fetch(config):
     all_data = pd.DataFrame()
     for data in datasets:
         datasets[data].rename(columns={data: 'poi'}, inplace=True)
+        datasets[data]['category'] = data
         all_data = pd.concat([all_data, datasets[data]], ignore_index=True)
-    
-    all_data = all_data[['poi', 'place', 'geometry', 'shape', 'name', 'centroid', 'lat', 'lon', 'id']].drop_duplicates()
-    
+
+    all_data = all_data[
+        ['category', 'poi', 'place', 'geometry', 'shape', 'name', 'centroid', 'lat',
+         'lon', 'id']].drop_duplicates()
+
     return all_data

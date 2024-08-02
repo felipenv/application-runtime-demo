@@ -29,5 +29,14 @@ if __name__=="__main__":
     fig = plot_poi(data, plot_config)
 
     page = vm.Page(
-        title="Example Dashboard",
+        title="Map POI",
+        components=[
+            vm.Graph(figure=fig)
+        ],
+        controls=[
+            vm.Filter(column="category"),
+            vm.Filter(column="poi")
+        ]
     )
+
+    Vizro().build(vm.Dashboard(pages=[page])).run()

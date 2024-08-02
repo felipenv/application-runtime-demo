@@ -2,10 +2,11 @@ import pandas as pd
 import geopandas as gpd
 
 from src.fetch_poi import FetchPoi
+from src.hexes import Hexes
 
 
 def fetch(config):
-    fetch = FetchPoi(config['location'],osm_endpoint=config['overpass_endpoint'])
+    fetch = FetchPoi(config['location'], osm_endpoint=config['overpass_endpoint'])
     datasets = {}
     for dataset in config['datasets']:
         print(f'fetching {dataset}')
@@ -30,4 +31,8 @@ def fetch(config):
 
     data_within_boundaries = gpd.sjoin(all_data, fetch.place_map[['geometry']],
                                        how='inner').drop(columns=['index_right'])
-    return data_within_boundaries
+
+    hexes = Hexes(place=config['location'])
+    hexes.get_place_hex(h3_resolution=config['h3_resolution'])
+
+    return data_within_boundaries, hexes.place_hexes

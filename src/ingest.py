@@ -1,4 +1,5 @@
 import pandas as pd
+import geopandas as gpd
 
 from src.fetch_poi import FetchPoi
 
@@ -27,4 +28,6 @@ def fetch(config):
         ['category', 'poi', 'place', 'geometry', 'shape', 'name', 'centroid', 'lat',
          'lon', 'id']].drop_duplicates()
 
-    return all_data
+    data_within_boundaries = gpd.sjoin(all_data, fetch.place_map[['geometry']],
+                                       how='inner').drop(columns=['index_right'])
+    return data_within_boundaries

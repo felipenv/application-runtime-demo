@@ -1,5 +1,5 @@
 location: "London"
-h3_resolution: 10
+h3_resolution: 8
 overpass_endpoint: "https://overpass-api.de/api/interpreter"
 datasets:
   amenity:
@@ -21,9 +21,13 @@ datasets:
 
 plots:
   mapbox_token: "pk.eyJ1IjoibWFja2xhcnMiLCJhIjoiY2w2dXo2OGRvMWh0MzNmcGJ3eDQyNDBrOCJ9.uyOgYliAIB1EZ8xWWyH1BQ"
-  colors:
-    amenity: "purple"
-    shop: "#EC9706"
-    leisure: "brown"
-    highway: "#ED7014"
-    railway: "#AAFF00"
+  pois:
+    colors:
+      amenity: "purple"
+      shop: "#EC9706"
+      leisure: "brown"
+      highway: "#ED7014"
+      railway: "#AAFF00"
+  hexes:
+    hover_info: [ 'hex_id', 'score' ]
+    palette: "RdYlGn"

@@ -37,7 +37,7 @@ def fetch(config):
         ['category', 'poi', 'place', 'geometry', 'shape', 'name', 'centroid', 'lat',
          'lon', 'id']].drop_duplicates()
 
-    data_within_boundaries = gpd.sjoin(all_data, fetch.place_map[['geometry']],
+    data_within_boundaries = gpd.sjoin(all_data, fetcher.place_map[['geometry']],
                                        how='inner').drop(columns=['index_right'])
 
     return data_within_boundaries, hex_scores

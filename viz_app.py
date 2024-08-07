@@ -129,47 +129,52 @@ def merge_graphs(data_frame, fig1, fig2):
     return go.Figure(data=fig1.data + fig2.data)
 
 
+config = yaml.safe_load(open("config/config.yaml"))
+pois = pickle.load(open("data/pois.pkl", 'rb'))
+hexes = pickle.load(open("data/hexes.pkl", 'rb'))
+
+hexes = final_score(hexes, config)
+
+plot_config = config['plots']
+
+px.set_mapbox_access_token(plot_config['mapbox_token'])
+
+fig_pois = plot_poi(pois, plot_config['pois'])
+
+hover_info = list(set(plot_config['hexes']['hover_info']) | set(
+    hexes.columns[hexes.columns.str.startswith('score')]))
+hex_fig = plot_hexes(geo_dataframe=hexes, hex_id="hex_id", value_field="score",
+                      geometry_field= "geometry", hover_data=hover_info,
+                     color_continuous_scale=plot_config['hexes']['palette'],
+                     satellite=False,
+                     mapbox_accesstoken=plot_config['mapbox_token'])
+
+hex_fig.update_mapboxes(center=dict(plot_config['center']),
+                        zoom=plot_config['zoom']
+)
+
+# for j in range(len(fig_pois.data)):
+#     hex_fig.add_trace(fig_pois.data[j])
+#     for i, frame in enumerate(hex_fig.frames):
+#         hex_fig.frames[i].data += (fig_pois.frames[i].data[j],)
+
+fig = merge_graphs(pd.DataFrame(), hex_fig, fig_pois)
+
+page = vm.Page(
+    title="Map POI",
+    components=[
+        vm.Graph(figure=fig)
+    ],
+    # controls=[
+    #     vm.Filter(column="category"),
+    #     vm.Filter(column="score")
+    # ]
+)
+
+dashboard = vm.Dashboard(pages=[page], theme="vizro_light")
+app = Vizro().build(dashboard)
+server = app.dash.server
+
+
 if __name__=="__main__":
-    config = yaml.safe_load(open("config/config.yaml"))
-    pois = pickle.load(open("data/pois.pkl", 'rb'))
-    hexes = pickle.load(open("data/hexes.pkl", 'rb'))
-
-    hexes = final_score(hexes, config)
-
-    plot_config = config['plots']
-
-    px.set_mapbox_access_token(plot_config['mapbox_token'])
-
-    fig_pois = plot_poi(pois, plot_config['pois'])
-
-    hover_info = list(set(plot_config['hexes']['hover_info']) | set(
-        hexes.columns[hexes.columns.str.startswith('score')]))
-    hex_fig = plot_hexes(geo_dataframe=hexes, hex_id="hex_id", value_field="score",
-                          geometry_field= "geometry", hover_data=hover_info,
-                         color_continuous_scale=plot_config['hexes']['palette'],
-                         satellite=False,
-                         mapbox_accesstoken=plot_config['mapbox_token'])
-
-    hex_fig.update_mapboxes(center=dict(plot_config['center']),
-                            zoom=plot_config['zoom']
-    )
-
-    # for j in range(len(fig_pois.data)):
-    #     hex_fig.add_trace(fig_pois.data[j])
-    #     for i, frame in enumerate(hex_fig.frames):
-    #         hex_fig.frames[i].data += (fig_pois.frames[i].data[j],)
-
-    fig = merge_graphs(pd.DataFrame(), hex_fig, fig_pois)
-
-    page = vm.Page(
-        title="Map POI",
-        components=[
-            vm.Graph(figure=fig)
-        ],
-        # controls=[
-        #     vm.Filter(column="category"),
-        #     vm.Filter(column="score")
-        # ]
-    )
-
-    Vizro().build(vm.Dashboard(pages=[page], theme="vizro_light")).run()
+    app.run()

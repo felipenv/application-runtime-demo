@@ -5,23 +5,32 @@ datasets:
   amenity:
     tag: "amenity"
     values: ["school", "hospital", "pub", "restaurant"]
+    weight: 0.2
   shop:
     tag: "shop"
     values: ["supermarket"]
+    weight: 0.2
   leisure:
     tag: "leisure"
     values: ["fitness_centre", "swimming_pool"]
+    weight: 0.2
   highway:
     tag: "highway"
     values: ["bus_stop"]
+    weight: 0.2
   railway:
     tag: "railway"
     values: ["station", "tram_stop"]
+    weight: 0.2
 
 
 plots:
   mapbox_token: "pk.eyJ1IjoibWFja2xhcnMiLCJhIjoiY2w2dXo2OGRvMWh0MzNmcGJ3eDQyNDBrOCJ9.uyOgYliAIB1EZ8xWWyH1BQ"
+  zoom: 7
+  center: {"lat": 51.5,
+           "lon": -0.07}
   pois:
+    hover_info: ['category', 'poi', 'name']
     colors:
       amenity: "purple"
       shop: "#EC9706"
@@ -29,5 +38,6 @@ plots:
       highway: "#ED7014"
       railway: "#AAFF00"
   hexes:
-    hover_info: [ 'hex_id', 'score' ]
+    hover_info: ['hex_id', 'score']
     palette: "RdYlGn"
+

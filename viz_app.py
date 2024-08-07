@@ -2,10 +2,14 @@ import json
 import pickle
 import yaml
 
-from geojson import Feature, Point, FeatureCollection, Polygon
-from vizro import Vizro
+import pandas as pd
+import plotly.graph_objects as go
 import vizro.models as vm
 import vizro.plotly.express as px
+
+from geojson import Feature, Point, FeatureCollection, Polygon
+from vizro import Vizro
+from vizro.models.types import capture
 
 
 def plot_poi(gdf, plot_config):
@@ -14,7 +18,7 @@ def plot_poi(gdf, plot_config):
                             # size="size",
                             color_discrete_map=plot_config['colors'],
                             size_max=8, zoom=8,
-                            hover_data=hover_data)
+                            hover_data=plot_config['hover_info'])
 
     return fig
 
@@ -109,10 +113,20 @@ def plot_hexes(geo_dataframe, hex_id, value_field, geometry_field, hover_data=No
     return fig
 
 
-def score_hexes(hexes, pois):
-    hexes['score'] = 0
+def final_score(hexes, config):
+    score_columns = hexes.columns[hexes.columns.str.startswith('score')]
+    hexes[score_columns] = hexes[score_columns].clip(0, 2)
+    for c in score_columns:
+        category = c.split('_')[1]
+        hexes[c] = hexes[c] * config['datasets'][category]['weight']
 
+    hexes['score'] = hexes[score_columns].sum(axis=1)
     return hexes
+
+
+@capture('graph')
+def merge_graphs(data_frame, fig1, fig2):
+    return go.Figure(data=fig1.data + fig2.data)
 
 
 if __name__=="__main__":
@@ -120,35 +134,42 @@ if __name__=="__main__":
     pois = pickle.load(open("data/pois.pkl", 'rb'))
     hexes = pickle.load(open("data/hexes.pkl", 'rb'))
 
-    hexes.reset_index(inplace=True)
-    hexes = score_hexes(hexes, pois)
+    hexes = final_score(hexes, config)
 
     plot_config = config['plots']
-    hover_data = ['poi', 'name']
 
     px.set_mapbox_access_token(plot_config['mapbox_token'])
 
     fig_pois = plot_poi(pois, plot_config['pois'])
-    hex_fig = plot_hexes(geo_dataframe=hexes, hex_id="hex_id", value_field="score",
-                          geometry_field= "geometry", hover_data=plot_config[
-            'hexes']['hover_info'], color_continuous_scale=plot_config[
-            'hexes']['palette'], satellite=False, mapbox_accesstoken=plot_config[
-            'mapbox_token'])
 
-    for j in range(len(fig_pois.data)):
-        hex_fig.add_trace(fig_pois.data[j])
-        for i, frame in enumerate(hex_fig.frames):
-            hex_fig.frames[i].data += (fig_pois.frames[i].data[j],)
+    hover_info = list(set(plot_config['hexes']['hover_info']) | set(
+        hexes.columns[hexes.columns.str.startswith('score')]))
+    hex_fig = plot_hexes(geo_dataframe=hexes, hex_id="hex_id", value_field="score",
+                          geometry_field= "geometry", hover_data=hover_info,
+                         color_continuous_scale=plot_config['hexes']['palette'],
+                         satellite=False,
+                         mapbox_accesstoken=plot_config['mapbox_token'])
+
+    hex_fig.update_mapboxes(center=dict(plot_config['center']),
+                            zoom=plot_config['zoom']
+    )
+
+    # for j in range(len(fig_pois.data)):
+    #     hex_fig.add_trace(fig_pois.data[j])
+    #     for i, frame in enumerate(hex_fig.frames):
+    #         hex_fig.frames[i].data += (fig_pois.frames[i].data[j],)
+
+    fig = merge_graphs(pd.DataFrame(), hex_fig, fig_pois)
 
     page = vm.Page(
         title="Map POI",
         components=[
-            vm.Graph(figure=hex_fig)
+            vm.Graph(figure=fig)
         ],
-        controls=[
-            vm.Filter(column="category"),
-            vm.Filter(column="poi")
-        ]
+        # controls=[
+        #     vm.Filter(column="category"),
+        #     vm.Filter(column="score")
+        # ]
     )
 
     Vizro().build(vm.Dashboard(pages=[page], theme="vizro_light")).run()

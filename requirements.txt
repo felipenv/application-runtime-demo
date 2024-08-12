@@ -10,3 +10,4 @@ pandas
 scikit-learn
 h3
 tobler
+vizro
